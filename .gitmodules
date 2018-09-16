@@ -1,0 +1,6 @@
+[submodule "hub"]
+	path = hub
+	url = git@github.com:ShilinSemyon/hub.git
+[submodule "adapter"]
+	path = adapter
+	url = git@github.com:ShilinSemyon/adapter.git

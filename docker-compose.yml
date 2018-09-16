@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+
+  adapter:
+    build:
+      context: "./adapter"
+      dockerfile: "Dockerfile"
+    command: mix phx.server
+    ports:
+      - "4000:4000"
+    environment:
+      MIX_ENV: dev
+      # Эти переменные нужны для телеграмма. Если сообщения не будут доходить, то поменяйте их.
+      PROXY_HOST: "5.135.164.72"
+      PROXY_PORT: 3128
+    links:
+      - rabbitmq
+    depends_on:
+      - rabbitmq
+
+  hub:
+    build:
+      context: "./hub"
+      dockerfile: Dockerfile
+    command: /bin/sh start.sh
+    ports:
+      - "4001:4001"
+    environment:
+      MIX_ENV: dev
+      PORT: 4001
+    links:
+      - db
+      - rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    image: postgres:9.4.14
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: hub_prod
+    volumes:
+      - /volumes/postgres:/var/lib/postgresql
